@@ -10,7 +10,7 @@
 #' @importFrom english as.english
 #'
 #' @export
-run_t_test <- function(data, x, mu = 0, alternative) {
+run_t_test <- function(data, x, mu = 0, alternative = "two.sided") {
   if(!is.data.frame(data)) {
     stop("Input 'data' must be a dataframe.")
   }
@@ -22,14 +22,14 @@ run_t_test <- function(data, x, mu = 0, alternative) {
   # Display the qqplot
   display_qqplot(data, x)
   
-  # Check assumptions
-  assumptions <- check_assumptions(data[[x]])
-  
+  # Check normality assumption
+  normality <- check_normality(data[[x]])
+
   # CLT may not apply if the sample size is less than 30
   if (length(data[[x]] < 30)) {
   
-    # If normallity assumption is not met, display warning message
-    if(assumptions$normality$normality_assumption == "Not met") {
+    # If normality assumption is not met, display warning message
+    if(normality$normality$normality_assumption == "Not met") {
       print("Warning: Possible issues with normallity, proceed with caution")
     }
   
@@ -42,7 +42,7 @@ run_t_test <- function(data, x, mu = 0, alternative) {
 }
 
 
-#' Check normallity assumption
+#' Check normality assumption
 #'
 #' This function checks the assumptions of a one-sample t-test.
 #' 
@@ -57,7 +57,7 @@ run_t_test <- function(data, x, mu = 0, alternative) {
 #' print(assumptions)
 #' 
 #' @export
-check_assumptions <- function(data, alpha = 0.05) {
+check_normality <- function(data, alpha = 0.05) {
   if(!is.numeric(data)) {
     stop("Input 'data' must be numeric.")
   }
@@ -94,3 +94,32 @@ display_qqplot <- function(data, x) {
 }
 
 
+#' Creates a qqplot to check the normallity assumption
+#'
+#' @param data The dataframe
+#' @param x Variable of interest (must be numeric)
+#'
+#' @return A normallity qqplot
+#'
+#' @export
+check_outliers <- function(data) {
+  if(!is.numeric(data)) {
+    stop("Input 'data' must be numeric.")
+  }
+  
+  # Calculate the first and third quartiles
+  q1 <- quantile(data, 0.25)
+  q3 <- quantile(data, 0.75)
+  
+  # Calculate the interquartile range (IQR)
+  iqr <- q3 - q1
+  
+  # Define the lower and upper bounds for outliers
+  lower_bound <- q1 - 1.5 * iqr
+  upper_bound <- q3 + 1.5 * iqr
+  
+  # Identify outliers
+  outliers <- data[data < lower_bound | data > upper_bound]
+  
+  return(outliers)
+}

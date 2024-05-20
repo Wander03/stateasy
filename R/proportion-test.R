@@ -91,51 +91,57 @@ check_assumptions <- function(data_vec) {
 #' @export
 plot_sampling_distribution <- function(p_hat, SE_p_hat, hypo_p, hypo_direction) {
   
-  p_vec = seq(0, 1, 0.01)
-  norm_density = dnorm(p_vec, mean = hypo_p, sd = SE_p_hat)
-  
-  data.frame(p_vec, norm_density) %>% 
-    mutate(
-      shaded_right = case_when(
-        p_vec >= p_hat & hypo_direction == ">" ~ TRUE,
-        p_vec >= hypo_p + abs(p_hat - hypo_p) & hypo_direction == "!=" ~ TRUE,
-        TRUE ~ FALSE
-      ),
-      shaded_left = case_when(
-        p_vec <= p_hat & hypo_direction == "<" ~ TRUE,
-        p_vec <= hypo_p - abs(p_hat - hypo_p) & hypo_direction == "!=" ~ TRUE,
-        TRUE ~ FALSE
-      ),
-      
-      shaded = case_when(
-        p_vec >= p_hat & hypo_direction == ">" ~ TRUE,
-        p_vec <= p_hat & hypo_direction == "<" ~ TRUE,
-        (p_vec >= hypo_p + abs(p_hat - hypo_p) | p_vec <= hypo_p - abs(p_hat - hypo_p)) & hypo_direction == "!=" ~ TRUE,
-        TRUE ~ FALSE
-      )
-    ) %>% 
-    ggplot(
-      aes(
-        x = p_vec,
-        y = norm_density
-      )
-    ) + 
-    geom_line() +
-    geom_vline(xintercept = p_hat) +
-    geom_hline(yintercept = 0) +
-    geom_area(
-      aes(
-        x = if_else(shaded_right, p_vec, -1)
-      ),
-      fill = "red"
-    ) +
-    geom_area(
-      aes(
-        x = if_else(shaded_left, p_vec, -1)
-      ),
-      fill = "red"
-    ) +
-    xlim(0, 1)
+  if (hypo_p != -1 & hypo_direction != "") {
+    
+    p_vec = seq(0, 1, 0.01)
+    norm_density = dnorm(p_vec, mean = hypo_p, sd = SE_p_hat)
+    
+    sampling_dist = data.frame(p_vec, norm_density) %>% 
+      mutate(
+        shaded_right = case_when(
+          p_vec >= p_hat & hypo_direction == ">" ~ TRUE,
+          p_vec >= hypo_p + abs(p_hat - hypo_p) & hypo_direction == "!=" ~ TRUE,
+          TRUE ~ FALSE
+        ),
+        shaded_left = case_when(
+          p_vec <= p_hat & hypo_direction == "<" ~ TRUE,
+          p_vec <= hypo_p - abs(p_hat - hypo_p) & hypo_direction == "!=" ~ TRUE,
+          TRUE ~ FALSE
+        ),
+        
+        shaded = case_when(
+          p_vec >= p_hat & hypo_direction == ">" ~ TRUE,
+          p_vec <= p_hat & hypo_direction == "<" ~ TRUE,
+          (p_vec >= hypo_p + abs(p_hat - hypo_p) | p_vec <= hypo_p - abs(p_hat - hypo_p)) & hypo_direction == "!=" ~ TRUE,
+          TRUE ~ FALSE
+        )
+      ) %>% 
+      ggplot(
+        aes(
+          x = p_vec,
+          y = norm_density
+        )
+      ) + 
+      geom_line() +
+      geom_vline(xintercept = p_hat) +
+      geom_hline(yintercept = 0) +
+      geom_area(
+        aes(
+          x = if_else(shaded_right, p_vec, NA)
+        ),
+        fill = "red"
+      ) +
+      geom_area(
+        aes(
+          x = if_else(shaded_left, p_vec, NA)
+        ),
+        fill = "red"
+      ) +
+      xlim(0, 1)
+    
+    suppressWarnings(print(sampling_dist))
+    
+  }
   
 }
 

@@ -138,3 +138,33 @@ plot_sampling_distribution <- function(p_hat, SE_p_hat, hypo_p, hypo_direction) 
     xlim(0, 1)
   
 }
+
+
+
+
+
+#' Calculate a confidence interval for a specified level of confidence
+#'
+#' @param data_vec A vector of TRUE/FALSE or 0/1 data representing the sample
+#' @param conf_level A number between 0 and 1 specifying the confidence level
+#'
+#' @return A dataframe with confidence level, lower bound, and upper bound
+#'
+#' @export
+get_conf_int <- function(data_vec, conf_level) {
+  
+  p_hat = mean(data_vec)
+  n = length(data_vec)
+  z_crit = qnorm((1 - conf_level) / 2)
+  
+  lb = p_hat + z_crit * sqrt(p_hat * (1 - p_hat) / n)
+  ub = p_hat - z_crit * sqrt(p_hat * (1 - p_hat) / n)
+  
+  return(
+    data.frame(
+      conf_level = conf_level,
+      lower_bound = round(lb, 3),
+      upper_bound = round(ub, 3)
+    )
+  )
+}

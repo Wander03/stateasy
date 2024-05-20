@@ -8,7 +8,7 @@
 #' @importFrom dplyr rename
 #'
 #' @export
-get_summary_statistics <- function(data_vec, hypo_p = -1) {
+get_summary_statistics <- function(data_vec, hypo_p) {
   
   n = length(data_vec)
   n_yes = sum(data_vec)

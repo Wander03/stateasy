@@ -211,3 +211,40 @@ get_test_result <- function(p_hat, SE_p_hat, hypo_p, hypo_direction) {
   
   return(test_df)
 }
+
+
+
+
+
+
+
+#' Calculate the result of a one-sample z test for a population proportion
+#'
+#' @param data_vec A vector of TRUE/FALSE or 0/1 data representing the sample
+#' @param hypo_p The hypothesized value of the proportion
+#' @param hypo_direction The direction of the alternative hypothesis
+#' @param conf_level A number between 0 and 1 specifying the confidence level
+#'
+#' @return Several test results, confidence interval, plot of sampling distribution
+#'
+#' @export
+z_test <- function(data_vec, hypo_p = -1, hypo_direction = "", conf_level = 0.95) {
+  
+  summary_df <- get_summary_statistics(data_vec, hypo_p)
+  
+  print(summary_df)
+  
+  check_assumptions(data_vec)
+  
+  p_hat = summary_df$`Sample Proportion`
+  SE_p_hat = summary_df$`Standard Error`
+  
+  
+  plot_sampling_distribution(p_hat, SE_p_hat, hypo_p, hypo_direction)
+  
+  test_df = get_test_result(p_hat, SE_p_hat, hypo_p, hypo_direction)
+  
+  conf_df = get_conf_int(data_vec, conf_level)
+  
+  print(cbind(test_df, conf_df))
+}

@@ -168,3 +168,40 @@ get_conf_int <- function(data_vec, conf_level) {
     )
   )
 }
+
+
+#' Calculate the result of a one-sample z test for a population proportion
+#'
+#' @param p_hat The sample proportion
+#' @param SE_p_hat The standard error of the sample proportion
+#' @param hypo_p The hypothesized value of the proportion
+#' @param hypo_direction The direction of the alternative hypothesis
+#'
+#' @return A dataframe containing the test statistic and p-value
+#'
+#' @export
+get_test_result <- function(p_hat, SE_p_hat, hypo_p, hypo_direction) {
+  
+  z_value = (p_hat - hypo_p) / SE_p_hat
+  
+  if (hypo_direction == ">") {
+    p_value = pnorm(z_value, lower.tail = FALSE)
+  }
+  
+  else if (hypo_direction == "<") {
+    p_value = pnorm(z_value)
+  }
+  
+  else if (hypo_direction == "!=") {
+    p_value = pnorm(abs(z_value), lower.tail = FALSE) * 2
+  }
+  
+  test_df <- data.frame(
+    p_hat = p_hat,
+    SE_p_hat = SE_p_hat,
+    z_value = z_value,
+    p_value = p_value
+  )
+  
+  return(test_df)
+}

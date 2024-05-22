@@ -37,7 +37,6 @@ run_t_test <- function(data, x, hypo_mean = 0, alternative = "two.sided", conf_l
   # CLT may not apply if the sample size is less than 30
   if (length(data[[x]]) < 30) {
     
-    print("drilled")
     # If normality assumption is not met, display warning message
     if(normality$normality$normality_assumption == "Not met") {
       cat("Warning: Possible issues with normality, proceed with caution")

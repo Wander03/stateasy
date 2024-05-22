@@ -1,3 +1,42 @@
+#' Checks whether the specified hypothesized direction follows the correct form
+#'
+#' @param hypo_direction A string representing the direction of the alternative hypothesis
+#'
+#' @return A logical value indicating if the specified value matches the allowed options
+#'
+#' @export
+valid_direction <- function(hypo_direction) {
+  
+  if (hypo_direction %in% c("", ">", "<", "!=")) {
+    return(TRUE)
+  }
+  else {
+    return(FALSE)
+  }
+}
+
+
+#' Checks whether the specified data vector is boolean (TRUE/FALSE) or binary numeric (0/1)
+#'
+#' @param data_vec A vector of data representing the sample
+#'
+#' @return A logical value indicating if the specified data vector is of the correct data type
+#'
+#' @export
+valid_data_vec <- function(data_vec) {
+  
+  data_vec = data_vec %in% c(TRUE, FALSE)
+  
+  if (sum(data_vec) == length(data_vec)) {
+    return(TRUE)
+  }
+  else {
+    return(FALSE)
+  }
+}
+
+
+
 #' Check the assumptions of the one sample proportion test
 #'
 #' @param data_vec A vector of TRUE/FALSE or 0/1 data representing the sample

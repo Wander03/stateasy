@@ -262,11 +262,11 @@ get_test_result <- function(data_vec, hypo_p, hypo_direction) {
   
   # Put into summary dataframe
   test_df <- data.frame(
-    p_hat = p_hat,
+    p_hat = round(p_hat, 3),
     n = n,
-    SE_p_hat = SE_p_hat,
-    z_value = z_value,
-    p_value = p_value
+    SE_p_hat = round(SE_p_hat, 3),
+    z_value = round(z_value, 3),
+    p_value = round(p_value, 3)
   )
   
   # Return dataframe

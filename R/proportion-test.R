@@ -47,8 +47,8 @@ check_assumptions <- function(data_vec) {
 #'
 #' @return A plot of the sampling distribution
 #'
-#' @importFrom dplyr mutate
-#' @importFrom ggplot2 ggplot
+#' @importFrom dplyr mutate if_else case_when
+#' @importFrom ggplot2 ggplot aes geom_line geom_vline geom_hline geom_area xlim scale_y_continuous theme_bw labs
 #'
 #' @export
 plot_sampling_distribution <- function(p_hat, SE_p_hat, hypo_p, hypo_direction) {
@@ -64,12 +64,12 @@ plot_sampling_distribution <- function(p_hat, SE_p_hat, hypo_p, hypo_direction) 
     
     # Create shaded regions based on hypothesized directions and values
     mutate(
-      shaded_right = case_when(
+      shaded_right = dplyr::case_when(
         p_vec >= p_hat & hypo_direction == ">" ~ TRUE,
         p_vec >= hypo_p + abs(p_hat - hypo_p) & hypo_direction == "!=" ~ TRUE,
         TRUE ~ FALSE
       ),
-      shaded_left = case_when(
+      shaded_left = dplyr::case_when(
         p_vec <= p_hat & hypo_direction == "<" ~ TRUE,
         p_vec <= hypo_p - abs(p_hat - hypo_p) & hypo_direction == "!=" ~ TRUE,
         TRUE ~ FALSE
@@ -77,49 +77,49 @@ plot_sampling_distribution <- function(p_hat, SE_p_hat, hypo_p, hypo_direction) 
     ) %>% 
     
     # Create plot
-    ggplot(
-      aes(
+    ggplot2::ggplot(
+      ggplot2::aes(
         x = p_vec,
         y = norm_density
       )
     ) + 
     
     # Trace sampling distribution curve
-    geom_line() +
+    ggplot2::geom_line() +
     
     # Add vertical line at observed sample proportion
-    geom_vline(xintercept = p_hat) +
+    ggplot2::geom_vline(xintercept = p_hat) +
     
     # Add x-axis line
-    geom_hline(yintercept = 0) +
+    ggplot2::geom_hline(yintercept = 0) +
     
     # Add region for right shaded region
-    geom_area(
-      aes(
-        x = if_else(shaded_right, p_vec, NA)
+    ggplot2::geom_area(
+      ggplot2::aes(
+        x = dplyr::if_else(shaded_right, p_vec, NA)
       ),
       fill = "red"
     ) +
     
     # Add region for left shaded region
-    geom_area(
+    ggplot2::geom_area(
       aes(
-        x = if_else(shaded_left, p_vec, NA)
+        x = dplyr::if_else(shaded_left, p_vec, NA)
       ),
       fill = "red"
     ) +
     
     # Limit x to possible proportion values (0, 1)
-    xlim(0, 1) +
+    ggplot2::xlim(0, 1) +
     
     # Limit y to between 0 and top of density curve
-    scale_y_continuous(
+    ggplot2::scale_y_continuous(
       limits = c(0, max(norm_density) * 1.1), 
       expand = c(0, 0)
     ) +
     
     # Add axis labels and titles
-    labs(
+    ggplot2::labs(
       title = "Sampling Distribution for One-Sample z-test",
       subtitle = "Shaded region corresponds to p-value",
       x = "Sample Proportion",
@@ -127,7 +127,7 @@ plot_sampling_distribution <- function(p_hat, SE_p_hat, hypo_p, hypo_direction) 
     ) +
     
     # Add simple theme
-    theme_bw()
+    ggplot2::theme_bw()
   
   # Suppress warnings because p-value shading creates "missing" values in plot
   suppressWarnings(print(sampling_dist))

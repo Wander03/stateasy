@@ -192,7 +192,7 @@ get_conf_int <- function(data_vec, conf_level) {
   p_hat = mean(data_vec)
   n = length(data_vec)
   
-  # Calculate critical value accoridng to confidence level
+  # Calculate critical value according to confidence level
   z_crit = qnorm((1 - conf_level) / 2)
   
   # Calculate lower and upper bound

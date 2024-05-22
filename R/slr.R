@@ -1,6 +1,6 @@
 #' Performs simple linear regression
 #'
-#' @param df Data frame containing predictor and response variables
+#' @param data A dataframe containing the data.
 #' @param x Predictor variable
 #' @param y Response variable
 #' @param intercept True if the intercept should be used, False otherwise
@@ -13,14 +13,28 @@
 #' @importFrom gridExtra grid.arrange
 #' @importFrom broom augment
 #' @importFrom stats lm shapiro.test cor
+#' @importFrom withr with_options
 #'
 #' @export
-perform_slr <- function(df, x, y, intercept = TRUE) {
-
+perform_slr <- function(data, x, y, intercept = TRUE) {
+  
+  # Check inputs
+  if(!is.data.frame(data)) {
+    stop("Input 'data' must be a dataframe.")
+  }
+  
+  if(x %in% names(data) == FALSE) {
+    stop("Column '", x, "' not found in the dataframe.")
+  }
+  
+  if(y %in% names(data) == FALSE) {
+    stop("Column '", y, "' not found in the dataframe.")
+  }
+  
   # Extract predictor and response
   predictor <- df %>% pull({{x}})
   response <- df %>% pull({{y}})  
-
+  
   # Check that inputs are numeric
   stopifnot(is.numeric(predictor) & is.numeric(response))
   
@@ -31,23 +45,23 @@ perform_slr <- function(df, x, y, intercept = TRUE) {
   }
   model <- lm(formula, data = df)
   model.diag.metrics <- augment(model)
-
+  
   # Print summary of coefficients
   cat("Summary of coefficients:")
-  print(kable(summary(model)$coefficients, digits = 4))
+  print(summary(model)$coefficients, digits = 4)
   
   # Create and display scatter plot with regression line
   plot <- create_scatter_plot(df, {{x}}, {{y}}, model, model.diag.metrics, intercept)
   print(plot)
-
+  
   # Test assumptions
   test_assumptions(model, model.diag.metrics, intercept)
-
+  
 }
 
 
 create_scatter_plot <- function(df, x, y, model, model.diag.metrics, intercept) {
-
+  
   std_residuals <- model.diag.metrics$.std.resid
   leverage <- model.diag.metrics$.hat
   cooks_d <- model.diag.metrics$.cooksd
@@ -61,34 +75,21 @@ create_scatter_plot <- function(df, x, y, model, model.diag.metrics, intercept) 
   } else {
     y ~ x - 1
   }
-
-  model.diag.metrics <- model.diag.metrics %>%
-    mutate(label = case_when(
-      .std.resid > std_residuals_threshold &
-        .hat > leverage_threshold &
-        .cooksd > cooks_d_threshold ~ 
-        "red",
-      .std.resid > std_residuals_threshold &
-        .hat > leverage_threshold ~
-        "orange",
-      .cooksd > cooks_d_threshold ~
-        "green",
-      TRUE ~ "black"
-        )
-      )
-
+  
   p <- ggplot(data = model.diag.metrics, mapping = aes({{x}}, {{y}})) +
     geom_smooth(method = "lm", formula = formula, se = FALSE, color = "lightblue") +
     geom_segment(aes(xend = {{x}}, yend = .fitted), color = "red", size = 0.3) +
-    # geom_point(color = "black") +
-    theme_bw() +
-    geom_point(aes(color = label), size = 3, show.legend = TRUE)
-    
-  # p <- p + geom_text(data = subset(model.diag.metrics, cooks_d > cooks_d_threshold),
-  #                    aes(x = {{x}}, y = {{y}}, label = row.names(model.diag.metrics)[cooks_d > cooks_d_threshold]), 
-  #                    color = "black", size = 3, hjust=-1, vjust=0)
+    geom_point(aes(
+      text = 
+    ),
+    color = "black"
+    ) +
+    theme_bw()
   
-  # ggplotly(p, tooltip = c("x", "y", ".fitted"), width = 800, height = 600)
+  with_options(
+    list(digits = 4),
+    ggplotly(p, tooltip = c("x", "y", ".fitted"), width = 800, height = 600)
+  )
   
 }
 
@@ -103,7 +104,7 @@ test_assumptions <- function(model, model.diag.metrics, intercept) {
   cooks_d <- model.diag.metrics$.cooksd
   
   violated_indices <- list()
-
+  
   # Linearity
   plot1 <- ggplot(data = NULL, aes(x = fitted, y = residuals)) +
     geom_point() +
@@ -144,14 +145,14 @@ test_assumptions <- function(model, model.diag.metrics, intercept) {
       y = "Absolute Residuals",
       title = "Scale-Location Plot"
     )
-
+  
   if (cor(fitted, abs(residuals)) > 0.5) {
     violated_indices[["homoscedasticity"]] <- TRUE
   }
   
   # Leverage
   leverage_threshold <- 2 * length(coef(model)) / nrow(model.diag.metrics)
-
+  
   plot4 <- ggplot(data = model.diag.metrics, aes(x = .hat, y = .std.resid)) +
     geom_point() +
     geom_hline(yintercept = 3, linetype = "dashed", color = "red") +
@@ -190,7 +191,7 @@ test_assumptions <- function(model, model.diag.metrics, intercept) {
       y = "Cook's Distance",
       title = "Cook's Distance vs Leverage"
     )
-
+  
   if (any(cooks_d > cooks_d_threshold)) {
     violated_indices[["cooks_distance"]] <- which(cooks_d > cooks_d_threshold)
   }
@@ -209,26 +210,25 @@ test_assumptions <- function(model, model.diag.metrics, intercept) {
   grid.arrange(plot1, plot2, plot3, plot4, plot5, ncol = 2)
   
 }
-
-library(dplyr)
-library(ggplot2)
-library(knitr)
-library(rlang)
-library(gridExtra)
-library(broom)
-library(plotly)
-
-a <- rnorm(10)
-b <- a + rnorm(10)
-
-df <- data.frame(a, b)
-df <- rename(df, c('var1' = a, 'var2' = b))
-
-# df <- rbind(df, data.frame('var1' = -10, 'var2' = 10))
-
+# 
+# library(dplyr)
+# library(ggplot2)
+# library(knitr)
+# library(rlang)
+# library(gridExtra)
+# library(broom)
+# library(plotly)
+# library(withr)
+# 
+# a <- rnorm(10)
+# b <- a + rnorm(10)
+# 
+# df <- data.frame(a, b)
+# df <- rename(df, c('var1' = a, 'var2' = b))
+# 
+# df <- rbind(df, data.frame('var1' = 1, 'var2' = 100))
+# 
 # perform_slr(df, var1, var2, TRUE)
-
-perform_slr(alcoholtobacco, Tobacco, Alcohol, TRUE)
 
 
 

@@ -232,8 +232,8 @@ get_test_result <- function(data_vec, hypo_p, hypo_direction) {
     SE_p_hat = sqrt(p_hat * (1 - p_hat) / n)
     
     # Test summaries are null
-    z_value = NA
-    p_value = NA
+    z_value = NA_real_
+    p_value = NA_real_
   }
   
   # If there is a hypothesis test

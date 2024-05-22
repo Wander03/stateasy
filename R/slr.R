@@ -228,7 +228,6 @@ df <- rename(df, c('var1' = a, 'var2' = b))
 
 # perform_slr(df, var1, var2, TRUE)
 
-perform_slr(alcoholtobacco, Tobacco, Alcohol, TRUE)
 
 
 

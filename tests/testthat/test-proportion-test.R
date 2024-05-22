@@ -62,24 +62,25 @@ test_that("Validate that assumption checking is working properly", {
       )
     )
   
+  data_vec = c(rep(1, 20), rep(0, 30))
+  
   my_result <- check_assumptions(c(rep(1, 20), rep(0, 30)))
   
   expect_equal(my_result, correct_result)
 })
 
 
-test_that("Confidence Interval correctly calculated with no hypothesis test", {
+test_that("Confidence Interval correctly calculated", {
   
   correct_result <- data.frame(
-    condition = c("Random", "Independence", "Normality"),
-    description = c(
-      "Was the sample randomly collected from the population of interest?",
-      "Is the sample size (50) less than 10% of the population size?",
-      "Are both the number of positives (20) and the number of negatives (30) both greater than or equal to 10?"
-    )
+    conf_level = 0.95,
+    lower_bound = 0.257,
+    upper_bound = 0.443
   )
   
-  my_result <- check_assumptions(c(rep(1, 20), rep(0, 30)))
+  data_vec = c(rep(1, 35), rep(0, 65))
+  
+  my_result <- get_conf_int(data_vec, 0.95)
   
   expect_equal(my_result, correct_result)
 })

@@ -43,6 +43,7 @@ valid_data_vec <- function(data_vec) {
 #'
 #' @return A data frame with information about the three conditions for the one-sample z-test
 #'
+#' @importFrom stringr str_c
 #' @export
 check_assumptions <- function(data_vec) {
   
@@ -53,12 +54,12 @@ check_assumptions <- function(data_vec) {
   
   check_vec = c(
     "Was the sample randomly collected from the population of interest?",
-    str_c(
+    stringr::str_c(
       "Is the sample size (",
       length(data_vec),
       ") less than 10% of the population size?"
     ),
-    str_c(
+    stringr::str_c(
       "Are both the number of positives (",
       sum(data_vec),
       ") and the number of negatives (",

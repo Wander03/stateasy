@@ -85,3 +85,39 @@ test_that("Confidence Interval correctly calculated", {
   expect_equal(my_result, correct_result)
 })
 
+
+test_that("Test summary correctly calculated when no hypothesis test performed", {
+  
+  correct_result <- data.frame(
+    p_hat = 0.75,
+    n = 200,
+    SE_p_hat = 0.031,
+    z_value = NA_real_,
+    p_value = NA_real_
+  )
+  
+  data_vec = c(rep(1, 150), rep(0, 50))
+  
+  my_result <- get_test_result(data_vec, hypo_p = -1, hypo_direction = "")
+  
+  expect_equal(my_result, correct_result)
+})
+
+
+test_that("Test summary correctly calculated when no hypothesis test performed", {
+  
+  correct_result <- data.frame(
+    p_hat = 0.75,
+    n = 200,
+    SE_p_hat = 0.032,
+    z_value = 1.543,
+    p_value = 0.061
+  )
+  
+  data_vec = c(rep(1, 150), rep(0, 50))
+  
+  my_result <- get_test_result(data_vec, hypo_p = 0.7, hypo_direction = ">")
+  
+  expect_equal(my_result, correct_result)
+})
+

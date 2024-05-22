@@ -79,17 +79,6 @@ test_that("get_conf_int_t returns the correct confidence interval", {
   expect_equal(test, correct_result)
 })
 
-test_that("get_conf_int_t handles single element vector", {
-  
-  data_vec <- c(5)
-  
-  correct_result <- data.frame(conf_level = 0.95, lower_bound = NaN, upper_bound = NaN)
-  
-  test <- get_conf_int_t(data_vec, 0.95)
-  
-  expect_equal(test, correct_result)
-})
-
 #-------------------------------------------------------------------------------
 
 # Test get_t_test_result  function

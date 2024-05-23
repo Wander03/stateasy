@@ -63,15 +63,15 @@ run_t_test <- function(data, x, hypo_mean = 0, alternative = "two.sided", conf_l
     cat("\n")
   }
   
-  sample_mean <- mean(data[[x]])
-  sample_sd <- sd(data[[x]])
-  n <- length(data[[x]])
+  s_mean <- mean(data[[x]])
+  s_sd <- sd(data[[x]])
+  n_rows <- length(data[[x]])
   
-  print(get_t_test_result(sample_mean, sample_sd, n, hypo_mean, alternative), row.names = FALSE)
+  print(get_t_test_result(s_mean, s_sd, n_rows, hypo_mean, alternative), row.names = FALSE)
   cat("\n")
   print(get_conf_int_t(data[[x]], conf_level), row.names = FALSE)
   
-  plot_sampling_distribution(sample_mean = sample_sd, sample_sd = sample_sd, n = n, hypo_mean = hypo_mean, hypo_direction = alternative)
+  plot_sampling_distribution_t(sample_mean = s_mean, sample_sd = s_sd, n = n_rows, hypo_mean = hypo_mean, hypo_direction = alternative)
 }
 
 
@@ -180,7 +180,7 @@ check_outliers <- function(data) {
 #' @importFrom ggplot2 ggplot aes geom_line geom_vline geom_hline geom_area xlim scale_y_continuous theme_bw labs
 #'
 #' @export
-plot_sampling_distribution <- function(sample_mean, sample_sd, n, hypo_mean, hypo_direction) {
+plot_sampling_distribution_t <- function(sample_mean, sample_sd, n, hypo_mean, hypo_direction) {
   
   # Calculate the standard error and t-statistic
   se <- sample_sd / sqrt(n)
@@ -194,17 +194,17 @@ plot_sampling_distribution <- function(sample_mean, sample_sd, n, hypo_mean, hyp
   # Create a data frame for plotting
   plot_data <- data.frame(t_vec, t_density) %>%
     dplyr::mutate(
-      shaded_right = case_when(
+      shaded_right = dplyr::case_when(
         t_vec >= sample_mean & hypo_direction == "greater" ~ TRUE,
         t_vec >= hypo_mean + abs(sample_mean - hypo_mean) & hypo_direction == "two.sided" ~ TRUE,
         TRUE ~ FALSE
       ),
-      shaded_left = case_when(
+      shaded_left = dplyr::case_when(
         t_vec <= sample_mean & hypo_direction == "less" ~ TRUE,
         t_vec <= hypo_mean - abs(sample_mean - hypo_mean) & hypo_direction == "two.sided" ~ TRUE,
         TRUE ~ FALSE
       ),
-      shaded = case_when(
+      shaded = dplyr::case_when(
         t_vec >= sample_mean & hypo_direction == "greater" ~ TRUE,
         t_vec <= sample_mean & hypo_direction == "less" ~ TRUE,
         (t_vec >= hypo_mean + abs(sample_mean - hypo_mean) | t_vec <= hypo_mean - abs(sample_mean - hypo_mean)) & hypo_direction == "two.sided" ~ TRUE,

@@ -20,22 +20,27 @@
 #' @export
 run_t_test <- function(data, x, hypo_mean = 0, alternative = "two.sided", conf_level = .95) {
   
+  # Check if input data is a dataframe
   if(!is.data.frame(data)) {
     stop("Input 'data' must be a dataframe.")
   }
   
+  # Check if the specified column exists in the dataframe
   if(x %in% names(data) == FALSE) {
     stop("Column '", x, "' not found in the dataframe.")
   }
   
+  # Check if the hypothesized mean is numeric
   if(!(is.numeric(hypo_mean))) {
     stop("The argument 'hypo_mean' must be passed a numeric value")
   }
   
+  # Check if the alternative hypothesis direction is valid
   if(!(alternative %in% c("two.sided", "less", "greater"))) {
     stop("The argument 'alternative' must be set to one of (two.sided, less, greater). Not ", "'", alternative, "'", ".")
   }
   
+  # Check if the confidence level is between 0 and 1 and numeric
   if(conf_level < 0 | conf_level > 1 | !(is.numeric(conf_level))) {
     stop("The argument 'conf_level' must be set to a numeric value between 0 and 1")
   }
@@ -58,8 +63,10 @@ run_t_test <- function(data, x, hypo_mean = 0, alternative = "two.sided", conf_l
     
   }
   
+  # Check for outliers
   outliers <- check_outliers(data[[x]])
   
+  # Print outliers if any are found
   if(nrow(outliers != 0)) {
     cat("Listed below are some outliers in the data, consider inspecting these values and why they are present:")
     cat("\n")
@@ -67,14 +74,19 @@ run_t_test <- function(data, x, hypo_mean = 0, alternative = "two.sided", conf_l
     cat("\n")
   }
   
+  # Calculate sample mean, standard deviation, and number of rows
   s_mean <- mean(data[[x]])
   s_sd <- sd(data[[x]])
   n_rows <- length(data[[x]])
   
+  # Print t-test results
   print(get_t_test_result(s_mean, s_sd, n_rows, hypo_mean, alternative), row.names = FALSE)
   cat("\n")
+  
+  # Print confidence interval
   print(get_conf_int_t(data[[x]], conf_level), row.names = FALSE)
   
+  # Plot sampling distribution
   plot_sampling_distribution_t(sample_mean = s_mean, sample_sd = s_sd, n = n_rows, hypo_mean = hypo_mean, hypo_direction = alternative)
 }
 
@@ -95,11 +107,13 @@ run_t_test <- function(data, x, hypo_mean = 0, alternative = "two.sided", conf_l
 #' 
 #' @export
 check_normality <- function(x, alpha = 0.05) {
+  
+  # Check if input data is numeric
   if(!is.numeric(x)) {
     stop("Input 'data' must be numeric.")
   }
   
-  # Check for normality (Shapiro-Wilk test)
+  # Perform Shapiro-Wilk test for normality
   normality_test <- shapiro.test(x)
   
   # Create a list to store the results
@@ -130,13 +144,11 @@ check_normality <- function(x, alpha = 0.05) {
 #'
 #' @export
 display_qqplot <- function(data, x) {
+  
+  # Generate QQ plot
   qqnorm(data[[x]])
   qqline(data[[x]])
 }
-
-
-
-
 
 #' Check for outliers in the data
 #'
@@ -149,6 +161,8 @@ display_qqplot <- function(data, x) {
 #'
 #' @export
 check_outliers <- function(data) {
+  
+  # Check if input data is numeric
   if (!is.numeric(data)) {
     stop("Input 'data' must be numeric.")
   }
@@ -256,6 +270,7 @@ plot_sampling_distribution_t <- function(sample_mean, sample_sd, n, hypo_mean, h
       ggplot2::xlim(hypo_mean - 4 * se, hypo_mean + 4 * se) +
       ggplot2::theme_bw()
     
+    # Print the plot
     print(p)
   })
 }
@@ -308,7 +323,7 @@ get_conf_int_t <- function(data_vec, conf_level) {
   
   return(conf_interval)
 }
-
+  
 
 
 
@@ -361,5 +376,4 @@ get_t_test_result <- function(sample_mean, sample_sd, n, hypo_mean, hypo_directi
   )
   
   return(test_result)
-  
 }

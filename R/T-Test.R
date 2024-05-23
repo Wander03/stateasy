@@ -36,6 +36,10 @@ run_t_test <- function(data, x, hypo_mean = 0, alternative = "two.sided", conf_l
     stop("The argument 'alternative' must be set to one of (two.sided, less, greater). Not ", "'", alternative, "'", ".")
   }
   
+  if(conf_level < 0 | conf_level > 1 | !(is.numeric(conf_level))) {
+    stop("The argument 'conf_level' must be set to a numeric value between 0 and 1")
+  }
+  
   # Display the QQ plot
   display_qqplot(data, x)
   
@@ -75,6 +79,9 @@ run_t_test <- function(data, x, hypo_mean = 0, alternative = "two.sided", conf_l
 }
 
 
+
+
+
 #' Check normality assumption
 #'
 #' This function checks the normality assumption for a one-sample t-test using 
@@ -108,6 +115,9 @@ check_normality <- function(x, alpha = 0.05) {
 }
 
 
+
+
+
 #' Display a QQ plot for checking the normality assumption
 #'
 #' This function generates a QQ plot to visually assess the normality of the data 
@@ -123,6 +133,9 @@ display_qqplot <- function(data, x) {
   qqnorm(data[[x]])
   qqline(data[[x]])
 }
+
+
+
 
 
 #' Check for outliers in the data
@@ -160,6 +173,9 @@ check_outliers <- function(data) {
   
   return(outliers)
 }
+
+
+
 
 
 #' Plot the sampling distribution for a one-sample t-test
@@ -245,6 +261,9 @@ plot_sampling_distribution_t <- function(sample_mean, sample_sd, n, hypo_mean, h
 }
 
 
+
+
+
 #' Calculate a confidence interval for a one-sample t-test
 #'
 #' This function calculates a confidence interval for the population mean of 
@@ -289,6 +308,9 @@ get_conf_int_t <- function(data_vec, conf_level) {
   
   return(conf_interval)
 }
+
+
+
 
 
 #' Calculate the result of a one-sample t-test for a population mean

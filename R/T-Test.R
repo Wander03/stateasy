@@ -28,6 +28,14 @@ run_t_test <- function(data, x, hypo_mean = 0, alternative = "two.sided", conf_l
     stop("Column '", x, "' not found in the dataframe.")
   }
   
+  if(!(is.numeric(hypo_mean))) {
+    stop("The argument 'hypo_mean' must be passed a numeric value")
+  }
+  
+  if(!(alternative %in% c("two.sided", "less", "greater"))) {
+    stop("The argument 'alternative' must be set to one of (two.sided, less, greater). Not ", "'", alternative, "'", ".")
+  }
+  
   # Display the QQ plot
   display_qqplot(data, x)
   
@@ -63,7 +71,7 @@ run_t_test <- function(data, x, hypo_mean = 0, alternative = "two.sided", conf_l
   cat("\n")
   print(get_conf_int_t(data[[x]], conf_level), row.names = FALSE)
   
-  plot_sampling_distribution(sample_mean, sample_sd, n, hypo_mean, alternative)
+  plot_sampling_distribution(sample_mean = sample_sd, sample_sd = sample_sd, n = n, hypo_mean = hypo_mean, hypo_direction = alternative)
 }
 
 
@@ -167,6 +175,9 @@ check_outliers <- function(data) {
 #' @param hypo_direction The direction of the alternative hypothesis ("greater", "less", "two.sided").
 #'
 #' @return A plot of the sampling distribution.
+#' 
+#' @importFrom dplyr mutate if_else case_when
+#' @importFrom ggplot2 ggplot aes geom_line geom_vline geom_hline geom_area xlim scale_y_continuous theme_bw labs
 #'
 #' @export
 plot_sampling_distribution <- function(sample_mean, sample_sd, n, hypo_mean, hypo_direction) {
@@ -182,7 +193,7 @@ plot_sampling_distribution <- function(sample_mean, sample_sd, n, hypo_mean, hyp
   
   # Create a data frame for plotting
   plot_data <- data.frame(t_vec, t_density) %>%
-    mutate(
+    dplyr::mutate(
       shaded_right = case_when(
         t_vec >= sample_mean & hypo_direction == "greater" ~ TRUE,
         t_vec >= hypo_mean + abs(sample_mean - hypo_mean) & hypo_direction == "two.sided" ~ TRUE,

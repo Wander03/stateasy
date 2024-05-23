@@ -330,4 +330,3 @@ get_t_test_result <- function(sample_mean, sample_sd, n, hypo_mean, hypo_directi
   return(test_result)
   
 }
-

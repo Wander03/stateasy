@@ -214,31 +214,31 @@ plot_sampling_distribution_t <- function(sample_mean, sample_sd, n, hypo_mean, h
   
   # Suppress warnings while plotting
   suppressWarnings({
-    p <- ggplot(plot_data, aes(x = t_vec, y = t_density)) + 
-      geom_line() +
-      geom_vline(xintercept = sample_mean) +
-      geom_hline(yintercept = 0) +
-      geom_area(
-        aes(
-          x = if_else(shaded_right, t_vec, as.numeric(NA))
+    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = t_vec, y = t_density)) + 
+      ggplot2::geom_line() +
+      ggplot2::geom_vline(xintercept = sample_mean) +
+      ggplot2::geom_hline(yintercept = 0) +
+      ggplot2::geom_area(
+        ggplot2::aes(
+          x = dplyr::if_else(shaded_right, t_vec, as.numeric(NA))
         ),
         fill = "red",
         alpha = 0.5
       ) +
-      geom_area(
-        aes(
-          x = if_else(shaded_left, t_vec, as.numeric(NA))
+      ggplot2::geom_area(
+        ggplot2::aes(
+          x = dplyr::if_else(shaded_left, t_vec, as.numeric(NA))
         ),
         fill = "red",
         alpha = 0.5
       ) +
-      labs(
+      ggplot2::labs(
         title = "Sampling Distribution for One-Sample t-Test",
         x = "Sample Mean",
         y = "Density"
       ) +
-      xlim(hypo_mean - 4 * se, hypo_mean + 4 * se) +
-      theme_bw()
+      ggplot2::xlim(hypo_mean - 4 * se, hypo_mean + 4 * se) +
+      ggplot2::theme_bw()
     
     print(p)
   })

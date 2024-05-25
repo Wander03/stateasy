@@ -2,10 +2,15 @@ Package: stateasy
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
-    person("Andrew", "Kerr", , "adkerr2001@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID")),
-    person("Ryan", "DeStefano", , "ryman5427@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    c(person(given = "Andrew", 
+          family = "Kerr", 
+          email = "adkerr2001@gmail.com", 
+          role = c("aut", "cre")),
+    person(given = "Ryan", 
+          family = "DeStefano", 
+          email = "ryman5427@gmail.com", 
+          role = c("aut"))
+    )
 Description: What the package does (one paragraph).
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license

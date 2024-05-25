@@ -17,7 +17,7 @@ perform_slr <- function(data, x, y, intercept = TRUE) {
   if(!is.data.frame(data)) {
     stop("Input 'data' must be a dataframe.")
   }
-
+  
   if(deparse(substitute(x)) %in% names(data) == FALSE) {
     stop("Column '", deparse(substitute(x)), "' not found in the dataframe.")
   }
@@ -31,7 +31,13 @@ perform_slr <- function(data, x, y, intercept = TRUE) {
   response <- data %>% dplyr::pull({{y}})  
   
   # Check that inputs are numeric
-  stopifnot(is.numeric(predictor) & is.numeric(response))
+  if(!is.numeric(predictor)) {
+    stop("Column '",deparse(substitute(x)), "' must be numeric")
+  }
+  
+  if(!is.numeric(response)) {
+    stop("Column '",deparse(substitute(y)), "' must be numeric")
+  }
   
   # Create model
   formula <- as.formula(paste(deparse(substitute(y)), "~", deparse(substitute(x))))
@@ -74,35 +80,32 @@ perform_slr <- function(data, x, y, intercept = TRUE) {
 #' @export
 create_scatter_plot <- function(df, x, y, model, model.diag.metrics, intercept) {
   
-  std_residuals <- model.diag.metrics$.std.resid
-  leverage <- model.diag.metrics$.hat
-  cooks_d <- model.diag.metrics$.cooksd
-  
-  std_residuals_threshold <- 3
-  leverage_threshold <- 2 * length(coef(model)) / nrow(model.diag.metrics)
-  cooks_d_threshold <- qf(.5, length(coef(model)), nrow(model.diag.metrics) - length(coef(model)))
-  
+  obs <- seq_along(1:nrow(df))
+
   formula <- if (intercept) {
     y ~ x
   } else {
     y ~ x - 1
   }
   
-  p <- ggplot2::ggplot(data = model.diag.metrics, mapping = ggplot2::aes({{x}}, {{y}})) +
-    ggplot2::geom_smooth(method = "lm", formula = formula, se = FALSE, color = "lightblue") +
-    ggplot2::geom_segment(ggplot2::aes(xend = {{x}}, yend = .fitted), color = "red", size = 0.3) +
-    ggplot2::geom_point(ggplot2::aes(
-      text = 
-    ),
-    color = "black"
+  p <- suppressWarnings(ggplot2::ggplot(
+    data = model.diag.metrics, 
+    mapping = ggplot2::aes(
+      {{x}}, 
+      {{y}})
     ) +
-    ggplot2::theme_bw()
+    ggplot2::geom_segment(ggplot2::aes(xend = {{x}}, yend = .fitted), color = "red", linewidth = 0.3) +
+    ggplot2::geom_smooth(method = "lm", formula = formula, se = FALSE, color = "lightblue") +
+    ggplot2::geom_point(ggplot2::aes(
+      text = paste("Obs:", obs, 
+                   "<br>X:", round({{x}}, 3), 
+                   "<br>Y:", round({{y}}, 3), 
+                   "<br>Fitted:", round(.fitted, 3))),
+      color = "black") +
+    ggplot2::theme_bw())
   
-  withr::with_options(
-    list(digits = 3),
-    plotly::ggplotly(p, tooltip = c("x", "y", ".fitted"), width = 800, height = 600)
-  )
-  
+  plotly::ggplotly(p, tooltip = c("text"), width = 800, height = 600)
+
 }
 
 #' Checks assumptions for simple linear regression
@@ -139,12 +142,7 @@ test_assumptions <- function(model, model.diag.metrics, intercept) {
       y = "Residuals",
       title = "Residuals vs Fitted"
     )
-  
-  linearity_test <- stats::lm(residuals ~ fitted)
-  if (summary(linearity_test)$coefficients[2, 4] < 0.05) {
-    violated_indices[["linearity"]] <- which(summary(linearity_test)$coefficients[, 4] < 0.05)
-  }
-  
+
   # Normality
   plot2 <- ggplot2::ggplot(data = NULL, ggplot2::aes(sample = residuals)) +
     ggplot2::stat_qq() +
@@ -205,7 +203,7 @@ test_assumptions <- function(model, model.diag.metrics, intercept) {
   # Cooks Dist.
   cooks_d_threshold <- qf(.5, length(coef(model)), nrow(model.diag.metrics) - length(coef(model)))
   
-  plot5 <- ggplot2::ggplot(data = model.diag.metrics, ggplot2::aes_string(x = ".hat", y = "cooks_d")) +
+  plot5 <- ggplot2::ggplot(data = model.diag.metrics, ggplot2::aes(x = .hat, y = cooks_d)) +
     ggplot2::geom_point() +
     ggplot2::geom_hline(yintercept = cooks_d_threshold, linetype = "dashed", color = "red") +
     ggplot2::geom_smooth(method = "loess", formula = y ~ x, se = FALSE, color = "lightblue") +
@@ -234,30 +232,3 @@ test_assumptions <- function(model, model.diag.metrics, intercept) {
   gridExtra::grid.arrange(plot1, plot2, plot3, plot4, plot5, ncol = 2)
   
 }
-# 
-# library(dplyr)
-# library(ggplot2)
-# library(knitr)
-# library(rlang)
-# library(gridExtra)
-# library(broom)
-# library(plotly)
-# library(withr)
-# 
-# a <- rnorm(10)
-# b <- a + rnorm(10)
-# # 
-# df <- data.frame(a, b)
-# df <- rename(df, c('var1' = a, 'var2' = b))
-# # 
-# # df <- rbind(df, data.frame('var1' = 1, 'var2' = 100))
-# # 
-# perform_slr(df, var1, var2, TRUE)
-
-
-
-
-
-
-
-

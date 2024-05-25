@@ -10,7 +10,7 @@ check_assumptions(data_vec)
 \item{data_vec}{A vector of TRUE/FALSE or 0/1 data representing the sample}
 }
 \value{
-No return value, but prints information about the conditions
+A data frame with information about the three conditions for the one-sample z-test
 }
 \description{
 Check the assumptions of the one sample proportion test

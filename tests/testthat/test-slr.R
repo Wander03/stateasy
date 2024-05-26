@@ -2,29 +2,29 @@ set.seed(123)
 test_data <- data.frame(x = rnorm(100), y = 2 * rnorm(100) + 1)
 
 
-# Test perform_slr function
-test_that("perform_slr works correctly with default settings", {
-  model <- perform_slr(test_data, x, y)
+# Test slr function
+test_that("slr works correctly with default settings", {
+  model <- slr(test_data, x, y)
   expect_s3_class(model, "lm")
   expect_equal(length(coef(model)), 2)
 })
 
-test_that("perform_slr works correctly without intercept", {
-  model <- perform_slr(test_data, x, y, intercept = FALSE)
+test_that("slr works correctly without intercept", {
+  model <- slr(test_data, x, y, intercept = FALSE)
   expect_s3_class(model, "lm")
   expect_equal(length(coef(model)), 1)
 })
 
-test_that("perform_slr handles non-dataframe input", {
-  expect_error(perform_slr(list(x = 1:10, y = 1:10), x, y))
+test_that("slr handles non-dataframe input", {
+  expect_error(slr(list(x = 1:10, y = 1:10), x, y))
 })
 
-test_that("perform_slr handles non-existing columns", {
-  expect_error(perform_slr(test_data, non_existing_column, y))
-  expect_error(perform_slr(test_data, x, non_existing_column))
+test_that("slr handles non-existing columns", {
+  expect_error(slr(test_data, non_existing_column, y))
+  expect_error(slr(test_data, x, non_existing_column))
 })
 
-test_that("perform_slr handles non-numeric columns", {
+test_that("slr handles non-numeric columns", {
   test_data_non_numeric <- data.frame(
     x = letters[1:10],
     y = rnorm(10)
@@ -33,15 +33,14 @@ test_that("perform_slr handles non-numeric columns", {
     x = rnorm(10),
     y = letters[1:10]
   )
-  expect_error(perform_slr(test_data_non_numeric, x, y))
-  expect_error(perform_slr(test_data_non_numeric_2, x, y))
+  expect_error(slr(test_data_non_numeric, x, y))
+  expect_error(slr(test_data_non_numeric_2, x, y))
 })
 
 # Test create_scatter_plot function
 test_that("create_scatter_plot works correctly", {
   model <- lm(y ~ x, data = test_data)
-  model_diag_metrics <- broom::augment(model)
-  plot <- create_scatter_plot(test_data, x, y, model, model_diag_metrics, intercept = TRUE)
+  plot <- create_scatter_plot(test_data, x, y, intercept = TRUE)
   expect_s3_class(plot, "plotly")
 })
 
@@ -52,8 +51,7 @@ test_that("test_assumptions detects violations", {
     y = c(rnorm(98), 50, -50)
   )
   model <- lm(y ~ x, data = test_data_violations)
-  model_diag_metrics <- broom::augment(model)
-  expect_output(test_assumptions(model, model_diag_metrics, intercept = TRUE), "Violations occurred in the following observations")
+  expect_output(test_assumptions(model, intercept = TRUE), "Violations occurred in the following observations")
 })
 
 test_that("test_assumptions detects normality violations", {
@@ -62,8 +60,7 @@ test_that("test_assumptions detects normality violations", {
     y = c(rnorm(95), 5, 6, 7, 8, 9)
   )
   model <- lm(y ~ x, data = test_data_normality_violation)
-  model_diag_metrics <- broom::augment(model)
-  expect_output(test_assumptions(model, model_diag_metrics, intercept = TRUE), "normality")
+  expect_output(test_assumptions(model, intercept = TRUE), "normality")
 })
 
 test_that("test_assumptions detects homoscedasticity violations", {
@@ -74,8 +71,7 @@ test_that("test_assumptions detects homoscedasticity violations", {
     y = y
   )
   model <- lm(y ~ x, data = test_data_homoscedasticity_violation)
-  model_diag_metrics <- broom::augment(model)
-  expect_output(test_assumptions(model, model_diag_metrics, intercept = TRUE), "homoscedasticity")
+  expect_output(test_assumptions(model, intercept = TRUE), "homoscedasticity")
 })
 
 test_that("test_assumptions detects leverage points", {
@@ -84,8 +80,7 @@ test_that("test_assumptions detects leverage points", {
     y = rnorm(100)
   )
   model <- lm(y ~ x, data = test_data_leverage_violation)
-  model_diag_metrics <- broom::augment(model)
-  expect_output(test_assumptions(model, model_diag_metrics, intercept = TRUE), "leverage")
+  expect_output(test_assumptions(model, intercept = TRUE), "leverage")
 })
 
 test_that("test_assumptions detects outliers", {
@@ -94,8 +89,7 @@ test_that("test_assumptions detects outliers", {
     y = c(rnorm(95), 10, -10, 12, -12, 15)
   )
   model <- lm(y ~ x, data = test_data_outliers_violation)
-  model_diag_metrics <- broom::augment(model)
-  expect_output(test_assumptions(model, model_diag_metrics, intercept = TRUE), "outliers")
+  expect_output(test_assumptions(model, intercept = TRUE), "outliers")
 })
 
 test_that("test_assumptions detects high Cook's distance", {
@@ -107,6 +101,5 @@ test_that("test_assumptions detects high Cook's distance", {
     y = y
   )
   model <- lm(y ~ x, data = test_data_cooksd_violation)
-  model_diag_metrics <- broom::augment(model)
-  expect_output(test_assumptions(model, model_diag_metrics, intercept = TRUE), "cooks_distance")
+  expect_output(test_assumptions(model, intercept = TRUE), "cooks_distance")
 })

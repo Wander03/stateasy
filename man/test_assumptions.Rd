@@ -2,20 +2,20 @@
 % Please edit documentation in R/slr.R
 \name{test_assumptions}
 \alias{test_assumptions}
-\title{Checks assumptions for simple linear regression}
+\title{This function checks assumptions for simple linear regression.}
 \usage{
-test_assumptions(model, model.diag.metrics, intercept)
+test_assumptions(model, intercept = TRUE)
 }
 \arguments{
 \item{model}{lm object of slr model}
 
-\item{model.diag.metrics}{common diagnostic metrics for lm model}
-
 \item{intercept}{True if the intercept should be used, False otherwise}
+
+\item{model.diag.metrics}{Common diagnostic metrics for lm model from broom::agument}
 }
 \value{
-Plots of assumptions for provided lm model
+Plots of assumptions for provided lm model and outputs observations to look into for violated assumptions.
 }
 \description{
-Checks assumptions for simple linear regression
+This function checks assumptions for simple linear regression.
 }

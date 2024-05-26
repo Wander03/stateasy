@@ -1,17 +1,18 @@
-#' Performs simple linear regression
+#' This function performs simple linear regression.
 #'
 #' @param data A dataframe containing the data.
 #' @param x Predictor variable
 #' @param y Response variable
 #' @param intercept True if the intercept should be used, False otherwise
 #'
-#' @return Common summary results and assumption checks for simple linear regression
+#' @return Common summary results and assumption checks for simple linear regression.
 #'
 #' @importFrom dplyr pull
 #' @importFrom broom augment
+#' @importFrom stats lm
 #'
 #' @export
-perform_slr <- function(data, x, y, intercept = TRUE) {
+slr <- function(data, x, y, intercept = TRUE) {
   
   # Check inputs
   if(!is.data.frame(data)) {
@@ -52,41 +53,43 @@ perform_slr <- function(data, x, y, intercept = TRUE) {
   print(summary(model)$coefficients, digits = 3)
   
   # Create and display scatter plot with regression line
-  plot <- create_scatter_plot(data, {{x}}, {{y}}, model, model.diag.metrics, intercept)
+  plot <- create_scatter_plot(data, {{x}}, {{y}}, intercept)
   print(plot)
   
   # Test assumptions
-  test_assumptions(model, model.diag.metrics, intercept)
+  test_assumptions(model, intercept)
   
   return(model)
   
 }
 
-#' Creates scatter plot for simple linear regression
+#' This function creates scatter plot for simple linear regression.
 #'
-#' @param df A dataframe containing the data.
+#' @param data A dataframe containing the data.
 #' @param x Predictor variable
 #' @param y Response variable
-#' @param model lm object of slr model
-#' @param model.diag.metrics common diagnostic metrics for lm model
 #' @param intercept True if the intercept should be used, False otherwise
 #'
-#' @return Scatter plot for provided lm model
+#' @return Plotly scatter plot for provided lm model.
 #'
 #' @importFrom ggplot2 ggplot aes geom_point geom_smooth geom_segment theme_bw labs
 #' @importFrom withr with_options
 #' @importFrom plotly ggplotly
+#' @importFrom broom augment
 #'
 #' @export
-create_scatter_plot <- function(df, x, y, model, model.diag.metrics, intercept) {
-  
-  obs <- seq_along(1:nrow(df))
+create_scatter_plot <- function(data, x, y, intercept = TRUE) {
+
+  obs <- seq_along(1:nrow(data))
 
   formula <- if (intercept) {
     y ~ x
   } else {
     y ~ x - 1
   }
+  
+  model <- stats::lm(formula, data = data)
+  model.diag.metrics <- broom::augment(model)
   
   p <- suppressWarnings(ggplot2::ggplot(
     data = model.diag.metrics, 
@@ -108,20 +111,23 @@ create_scatter_plot <- function(df, x, y, model, model.diag.metrics, intercept) 
 
 }
 
-#' Checks assumptions for simple linear regression
+#' This function checks assumptions for simple linear regression.
 #'
 #' @param model lm object of slr model
-#' @param model.diag.metrics common diagnostic metrics for lm model
+#' @param model.diag.metrics Common diagnostic metrics for lm model from broom::agument
 #' @param intercept True if the intercept should be used, False otherwise
 #'
-#' @return Plots of assumptions for provided lm model
+#' @return Plots of assumptions for provided lm model and outputs observations to look into for violated assumptions.
 #'
 #' @importFrom ggplot2 ggplot aes geom_point geom_smooth geom_segment stat_qq stat_qq_line geom_hline geom_vline theme_bw labs
 #' @importFrom gridExtra grid.arrange
 #' @importFrom stats lm shapiro.test cor
+#' @importFrom broom augment
 #'
 #' @export
-test_assumptions <- function(model, model.diag.metrics, intercept) {
+test_assumptions <- function(model, intercept = TRUE) {
+  
+  model.diag.metrics <- broom::augment(model)
   
   # Extract residuals, fitted values, leverage, standardized residuals and cooks distance
   residuals <- model$residuals
@@ -180,7 +186,6 @@ test_assumptions <- function(model, model.diag.metrics, intercept) {
     ggplot2::geom_hline(yintercept = 3, linetype = "dashed", color = "red") +
     ggplot2::geom_hline(yintercept = -3, linetype = "dashed", color = "red") +
     ggplot2::geom_vline(xintercept = 2 * length(coef(model)) / nrow(model.diag.metrics), linetype = "dashed", color = "blue") +
-    ggplot2::geom_smooth(method = "loess", formula = y ~ x, se = FALSE, color = "lightblue") +
     ggplot2::theme_bw() +
     ggplot2::labs(
       x = "Leverage",
@@ -206,7 +211,6 @@ test_assumptions <- function(model, model.diag.metrics, intercept) {
   plot5 <- ggplot2::ggplot(data = model.diag.metrics, ggplot2::aes(x = .hat, y = cooks_d)) +
     ggplot2::geom_point() +
     ggplot2::geom_hline(yintercept = cooks_d_threshold, linetype = "dashed", color = "red") +
-    ggplot2::geom_smooth(method = "loess", formula = y ~ x, se = FALSE, color = "lightblue") +
     ggplot2::theme_bw() +
     ggplot2::labs(
       x = "Leverage",
@@ -220,12 +224,12 @@ test_assumptions <- function(model, model.diag.metrics, intercept) {
   
   # Print indices of observations where violations occur
   if (length(violated_indices) > 0) {
-    cat("Violations occurred in the following observations:\n")
+    cat("\nViolations occurred in the following observations:\n")
     for (violation_type in names(violated_indices)) {
       cat(paste(violation_type, ": ", toString(violated_indices[[violation_type]]), "\n", sep = ""))
     }
   } else {
-    cat("No violations detected.\n")
+    cat("\nNo violations detected.\n")
   }
   
   # Display plots

@@ -18,7 +18,7 @@
 #' @importFrom english as.english
 #'
 #' @export
-run_t_test <- function(data, x, hypo_mean = 0, alternative = "two.sided", conf_level = .95) {
+t_test <- function(data, x, hypo_mean = 0, alternative = "two.sided", conf_level = .95) {
   
   # Check if input data is a dataframe
   if(!is.data.frame(data)) {

@@ -1,5 +1,5 @@
 Package: stateasy
-Title: What the Package Does (One Line, Title Case)
+Title: Introductory Statistics Functions
 Version: 0.0.0.9000
 Authors@R: 
     c(person(given = "Andrew", 
@@ -15,7 +15,7 @@ Authors@R:
             email = "spleader13@gmail.com",
             role = c("aut"))
     )
-Description: What the package does (one paragraph).
+Description: This package contains three fuctions commonly taught in introductory statistics coures: z_test, t_test, and slr.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
